@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bot Designer - Discord</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #2f2f2f;
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      background-color: #202020;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .back-btn { font-size: 26px; cursor: pointer; }
+    .header-title { font-size: 19px; font-weight: 600; flex: 1; }
+
+    .page { display: none; flex-direction: column; min-height: 100vh; }
+    .page.active { display: flex; }
+
+    /* Daftar Bot */
+    .discord-banner {
+      background: #5865f2; margin: 20px; padding: 15px 20px;
+      border-radius: 50px; display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .discord-banner img { width: 30px; height: 30px; }
+
+    .bot-list { flex: 1; padding: 0 20px 90px; }
+    .bot-card {
+      background: #1f1f1f; margin-bottom: 12px; padding: 16px;
+      border-radius: 14px; display: flex; align-items: center; gap: 15px;
+      cursor: pointer; transition: 0.2s;
+    }
+    .bot-card:hover { background: #292929; transform: scale(1.02); }
+    .bot-avatar {
+      width: 55px; height: 55px; border-radius: 50%; background: #555;
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+    }
+    .bot-info { flex: 1; }
+    .bot-info h3 { font-size: 17px; }
+    .bot-info p { font-size: 13px; color: #888; margin-top: 3px; }
+    .status-dot { width: 12px; height: 12px; border-radius: 50%; margin-left: auto; }
+
+    .empty-state { text-align: center; color: #777; margin-top: 100px; }
+
+    /* Floating Button */
+    .floating-btn {
+      position: fixed; bottom: 25px; right: 20px;
+      background: #8b00ff; color: white; padding: 15px 25px;
+      border-radius: 50px; font-weight: 600; display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 20px rgba(139,0,255,0.4); border: none; cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* Halaman Detail Bot */
+    .bot-header {
+      background: linear-gradient(135deg, #5865f2, #8b00ff);
+      padding: 30px 20px 20px; text-align: center;
+    }
+    .bot-header .bot-avatar { width: 90px; height: 90px; margin: 0 auto 15px; font-size: 50px; }
+
+    .tab-bar {
+      display: flex; background: #202020; border-bottom: 2px solid #333;
+    }
+    .tab {
+      flex: 1; padding: 15px; text-align: center; cursor: pointer;
+    }
+    .tab.active { background: #2f2f2f; border-bottom: 3px solid #8b00ff; }
+
+    .section { padding: 20px; }
+    .setting-group {
+      background: #1f1f1f; padding: 15px; border-radius: 12px; margin-bottom: 15px;
+    }
+    label { display: block; margin-bottom: 6px; font-size: 15px; }
+    input, select {
+      width: 100%; padding: 10px; background: #333; border: none; border-radius: 8px; color: white;
+    }
+
+    .toggle {
+      display: flex; justify-content: space-between; align-items: center; padding: 12px 0;
+    }
+    .switch {
+      position: relative; width: 50px; height: 26px; background: #555; border-radius: 50px; cursor: pointer;
+    }
+    .switch.on { background: #8b00ff; }
+    .switch::after {
+      content: ''; position: absolute; width: 22px; height: 22px; background: white;
+      border-radius: 50%; top: 2px; left: 2px; transition: 0.3s;
+    }
+    .switch.on::after { left: 26px; }
+
+    .command-list { margin-top: 15px; }
+    .command-item {
+      background: #292929; padding: 12px; border-radius: 10px; margin-bottom: 10px;
+      display: flex; justify-content: space-between;
+    }
+
+    .btn {
+      padding: 12px 20px; border: none; border-radius: 50px; font-weight: 600; cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-primary { background: #8b00ff; color: white; }
+    .btn-danger { background: #ff4444; color: white; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN DAFTAR BOT -->
+  <div id="daftar-page" class="page active">
+    <header>
+      <div class="header-title">Daftar Bot - Bot Designer</div>
+      <div>👤</div>
+    </header>
+
+    <div class="discord-banner">
+      <img src="https://upload.wikimedia.org/wikipedia/id/thumb/8/8a/Discord_Logo.svg/2048px-Discord_Logo.svg.png" alt="Discord">
+      Join our Discord server for app support
+    </div>
+
+    <div class="bot-list" id="botList"></div>
+
+    <button class="floating-btn" onclick="showCreatePage()">
+      <span style="font-size:26px;">+</span> Buat bot baru
+    </button>
+  </div>
+
+  <!-- HALAMAN BUAT BOT BARU -->
+  <div id="buat-page" class="page">
+    <header>
+      <span class="back-btn" onclick="showDaftarPage()">←</span>
+      <span class="header-title">Buat Bot Baru</span>
+    </header>
+    <!-- Form Buat Bot (sama seperti sebelumnya, saya ringkas) -->
+    <div class="section">
+      <div class="setting-group">
+        <label>Nama Bot</label>
+        <input type="text" id="newBotName" placeholder="Nama bot Anda">
+      </div>
+      <div class="setting-group">
+        <label>Token Bot</label>
+        <input type="text" id="newBotToken" placeholder="Masukkan token dari Discord Developer Portal">
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="createNewBot()">Buat Bot</button>
+    </div>
+  </div>
+
+  <!-- HALAMAN DETAIL BOT -->
+  <div id="detail-page" class="page">
+    <div id="botHeader" class="bot-header"></div>
+
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab(0)">Overview</div>
+      <div class="tab" onclick="switchTab(1)">Modules</div>
+      <div class="tab" onclick="switchTab(2)">Commands</div>
+    </div>
+
+    <div id="tab-content" class="section">
+      <!-- Konten akan diisi oleh JavaScript -->
+    </div>
+
+    <div style="padding:20px;">
+      <button class="btn btn-primary" style="width:100%" onclick="deployBot()">🚀 Deploy / Restart Bot</button>
+      <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="deleteCurrentBot()">Hapus Bot</button>
+    </div>
+  </div>
+
+  <script>
+    let bots = JSON.parse(localStorage.getItem('discordBots')) || [];
+    let currentBotIndex = -1;
+
+    function renderBotList() {
+      const container = document.getElementById('botList');
+      container.innerHTML = '';
+
+      if (bots.length === 0) {
+        container.innerHTML = `<div class="empty-state">Belum ada bot.<br>Klik tombol di bawah untuk membuat bot baru.</div>`;
+        return;
+      }
+
+      bots.forEach((bot, i) => {
+        const isOnline = bot.status === 'online';
+        const card = document.createElement('div');
+        card.className = 'bot-card';
+        card.innerHTML = `
+          <div class="bot-avatar">🤖</div>
+          <div class="bot-info">
+            <h3>${bot.name}</h3>
+            <p>Prefix: ${bot.prefix || '!'}</p>
+          </div>
+          <div class="status-dot" style="background: ${isOnline ? '#43b581' : '#f04747'}"></div>
+        `;
+        card.onclick = () => openBotDetail(i);
+        container.appendChild(card);
+      });
+    }
+
+    function showCreatePage() {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('buat-page').classList.add('active');
+    }
+
+    function showDaftarPage() {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('daftar-page').classList.add('active');
+      renderBotList();
+    }
+
+    function createNewBot() {
+      const name = document.getElementById('newBotName').value.trim();
+      const token = document.getElementById('newBotToken').value.trim();
+
+      if (!name || !token) {
+        alert("Nama bot dan Token wajib diisi!");
+        return;
+      }
+
+      bots.push({
+        name: name,
+        token: token,
+        prefix: "!",
+        status: "online",
+        avatar: "🤖",
+        modules: {
+          welcome: true,
+          moderation: true,
+          leveling: false,
+          autorole: false,
+          aiResponse: true
+        },
+        commands: [
+          { name: "ping", response: "Pong! 🏓" },
+          { name: "hello", response: "Halo! Selamat datang di server." }
+        ]
+      });
+
+      localStorage.setItem('discordBots', JSON.stringify(bots));
+      alert(`✅ Bot "${name}" berhasil dibuat!`);
+      document.getElementById('newBotName').value = '';
+      document.getElementById('newBotToken').value = '';
+      showDaftarPage();
+    }
+
+    function openBotDetail(index) {
+      currentBotIndex = index;
+      const bot = bots[index];
+
+      // Header Bot
+      document.getElementById('botHeader').innerHTML = `
+        <div class="bot-avatar">${bot.avatar}</div>
+        <h2>${bot.name}</h2>
+        <p>Status: <span style="color:${bot.status==='online'?'#43b581':'#f04747'}">${bot.status.toUpperCase()}</span></p>
+      `;
+
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('detail-page').classList.add('active');
+
+      switchTab(0); // default ke Overview
+    }
+
+    function switchTab(tab) {
+      const content = document.getElementById('tab-content');
+      const bot = bots[currentBotIndex];
+
+      if (tab === 0) { // Overview
+        content.innerHTML = `
+          <div class="setting-group">
+            <label>Prefix Command</label>
+            <input type="text" value="${bot.prefix}" id="prefixInput" onchange="updatePrefix()">
+          </div>
+          <div class="setting-group">
+            <label>Avatar URL (opsional)</label>
+            <input type="text" placeholder="https://..." id="avatarInput">
+          </div>
+          <p style="color:#aaa; font-size:14px;">Token: ${bot.token.substring(0,20)}...</p>
+        `;
+      } 
+      else if (tab === 1) { // Modules
+        let html = '';
+        for (let key in bot.modules) {
+          const name = key.charAt(0).toUpperCase() + key.slice(1);
+          html += `
+            <div class="toggle">
+              <span>${name.replace(/([A-Z])/g, ' $1')}</span>
+              <div class="switch ${bot.modules[key] ? 'on' : ''}" onclick="toggleModule('${key}')"></div>
+            </div>
+          `;
+        }
+        content.innerHTML = `<div class="setting-group">${html}</div>`;
+      } 
+      else if (tab === 2) { // Commands
+        let html = `<h3>Custom Commands</h3><div class="command-list">`;
+        bot.commands.forEach((cmd, i) => {
+          html += `
+            <div class="command-item">
+              <div><strong>!${cmd.name}</strong> → ${cmd.response}</div>
+              <button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="deleteCommand(${i})">Hapus</button>
+            </div>
+          `;
+        });
+        html += `</div>
+          <button class="btn btn-primary" onclick="addNewCommand()">+ Tambah Command Baru</button>`;
+        content.innerHTML = html;
+      }
+    }
+
+    function toggleModule(moduleKey) {
+      bots[currentBotIndex].modules[moduleKey] = !bots[currentBotIndex].modules[moduleKey];
+      localStorage.setItem('discordBots', JSON.stringify(bots));
+      switchTab(1); // refresh
+    }
+
+    function updatePrefix() {
+      bots[currentBotIndex].prefix = document.getElementById('prefixInput').value || '!';
+      localStorage.setItem('discordBots', JSON.stringify(bots));
+    }
+
+    function addNewCommand() {
+      const cmdName = prompt("Nama command (tanpa !):");
+      if (!cmdName) return;
+      const response = prompt("Response yang diberikan bot:");
+      if (!response) return;
+
+      bots[currentBotIndex].commands.push({ name: cmdName.toLowerCase(), response });
+      localStorage.setItem('discordBots', JSON.stringify(bots));
+      switchTab(2);
+    }
+
+    function deleteCommand(index) {
+      if (confirm("Hapus command ini?")) {
+        bots[currentBotIndex].commands.splice(index, 1);
+        localStorage.setItem('discordBots', JSON.stringify(bots));
+        switchTab(2);
+      }
+    }
+
+    function deployBot() {
+      alert(`🚀 Bot "${bots[currentBotIndex].name}" berhasil di-deploy ke Discord!\n\n(Status: Online)`);
+      bots[currentBotIndex].status = "online";
+      localStorage.setItem('discordBots', JSON.stringify(bots));
+    }
+
+    function deleteCurrentBot() {
+      if (confirm("Yakin ingin menghapus bot ini secara permanen?")) {
+        bots.splice(currentBotIndex, 1);
+        localStorage.setItem('discordBots', JSON.stringify(bots));
+        showDaftarPage();
+      }
+    }
+
+    // Inisialisasi
+    window.onload = () => {
+      renderBotList();
+    };
+  </script>
+</body>
+</html>
